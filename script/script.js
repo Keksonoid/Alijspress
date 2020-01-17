@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const wishlistBtn = document.getElementById('wishlist');
     const goodsWrapper = document.querySelector('.goods-wrapper');
     const cart = document.querySelector('.cart');
+    const category = document.querySelector('.category');
+
+    
 
     const createCardGoods = (id, title, price, img) => {
         const card = document.createElement('div');
@@ -24,9 +27,10 @@ document.addEventListener('DOMContentLoaded', function () {
         return card;
     };
 
-    goodsWrapper.appendChild(createCardGoods(1, 'Дартс', 2000, 'img/temp/Archer.jpg'));
-    goodsWrapper.appendChild(createCardGoods(2, 'Фламинго', 3000, 'img/temp/Flamingo.jpg'));
-    goodsWrapper.appendChild(createCardGoods(3, 'Носки', 333, 'img/temp/Socks.jpg'));
+
+    // goodsWrapper.appendChild(createCardGoods(1, 'Дартс', 2000, 'img/temp/Archer.jpg'));
+    // goodsWrapper.appendChild(createCardGoods(2, 'Фламинго', 3000, 'img/temp/Flamingo.jpg'));
+    // goodsWrapper.appendChild(createCardGoods(3, 'Носки', 333, 'img/temp/Socks.jpg'));
 
     const openCart = (e) => {
         e.preventDefault();
@@ -41,9 +45,45 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         
     };
+
+    const renderCard = items => {
+        goodsWrapper.textContent = '';
+        items.forEach(({ id, title, price, imgMin }) => {
+            goodsWrapper.appendChild(createCardGoods(id, title, price, imgMin));
+        });
+    };
+
+    const getGoods = (handler, filter) => {
+        fetch('../db/db.json')
+            .then(response => response.json())
+            .then(filter)
+            .then(handler);
+    };
+
+    const randomSort = (item) => {
+
+        return item.sort(() => Math.random() - 0.5);
+    };
+
+    const choiceCategory = e => {
+        e.preventDefault();
+        const target = e.target;
+
+        if(target.classList.contains('category-item')) {
+            const category = target.dataset.category;
+            getGoods(renderCard, goods => {
+                const newGoods = goods.filter(item => {
+                    return item.category.includes(category);
+                });
+                return newGoods;
+            });
+        }
+    };
     
     cartBtn.addEventListener('click', openCart);
     cart.addEventListener('click', closeCart);
     document.addEventListener('keydown', closeCart);
+    category.addEventListener('click', choiceCategory);
     
+    getGoods(renderCard, randomSort);
 });
